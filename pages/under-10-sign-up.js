@@ -28,21 +28,21 @@ const submitBTN = document.getElementById('submitBTN');
 const signUpForm = document.getElementById('signUpForm');
 
 // Image Preview
-// imageInput.addEventListener('change', function () {
-//   const file = this.files[0];
-//   if (file && file.type.startsWith('image/')) {
-//     const reader = new FileReader();
-//     reader.onload = function (e) {
-//       preview.src = e.target.result;
-//       preview.style.display = 'block';
-//     };
-//     reader.readAsDataURL(file);
-//   } else {
-//     preview.src = '';
-//     preview.style.display = 'none';
-//     alert("Please select a valid image file (jpg, png, etc).");
-//   }
-// });
+imageInput.addEventListener('change', function () {
+  const file = this.files[0];
+  if (file && file.type.startsWith('image/')) {
+    const reader = new FileReader();
+    reader.onload = function (e) {
+      preview.src = e.target.result;
+      preview.style.display = 'block';
+    };
+    reader.readAsDataURL(file);
+  } else {
+    preview.src = '';
+    preview.style.display = 'none';
+    alert("Please select a valid image file (jpg, png, etc).");
+  }
+});
 
 
 async function createTeamAccount(e) {
@@ -162,15 +162,15 @@ signUpForm.addEventListener("submit", createTeamAccount);
 // });
 
 // Image preview
-document.getElementById('teamLogo').addEventListener('change', function(e) {
-  const file = e.target.files[0];
-  if (file) {
-      const reader = new FileReader();
-      reader.onload = function(event) {
-          const preview = document.getElementById('logoPreview');
-          preview.src = event.target.result;
-          preview.classList.remove('d-none');
-      }
-      reader.readAsDataURL(file);
-  }
-});
+// document.getElementById('teamLogo').addEventListener('change', function(e) {
+//   const file = e.target.files[0];
+//   if (file) {
+//       const reader = new FileReader();
+//       reader.onload = function(event) {
+//           const preview = document.getElementById('logoPreview');
+//           preview.src = event.target.result;
+//           preview.classList.remove('d-none');
+//       }
+//       reader.readAsDataURL(file);
+//   }
+// });
