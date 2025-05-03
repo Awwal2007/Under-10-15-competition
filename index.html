@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Telu Fc - Football Competition">
+    <meta property="og:title" content="Telu FC - Football Competition">
+    <meta property="og:image" content="./multimedia/Alamu-fa-img/Telu Fc logo.png">
+    <title>Football Competition</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+         :root {
+            --primary: #1a2a6c;
+            --secondary: #b21f1f;
+            --accent: #fdbb2d;
+            --light: #f8f9fa;
+            --dark: #212529;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: var(--light);
+            color: var(--dark);
+            overflow-x: hidden;
+        }
+        
+        /* Header Styles */
+        header {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 1rem 0;
+            position: relative;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        .header-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 2rem;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .logo img {
+            height: 60px;
+            width: auto;
+        }
+        
+        .logo-text {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .logo-text h1 {
+            font-size: 2rem;
+            font-weight: 800;
+            letter-spacing: 1px;
+            line-height: 1;
+        }
+        
+        .logo-text span {
+            font-size: 0.9rem;
+            opacity: 0.9;
+            letter-spacing: 2px;
+        }
+        
+        nav ul {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
+        }
+        
+        nav a {
+            color: white;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            position: relative;
+            padding-bottom: 5px;
+        }
+        
+        nav a:hover {
+            color: var(--accent);
+        }
+        
+        nav a::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background-color: var(--accent);
+            transition: width 0.3s ease;
+        }
+        
+        nav a:hover::after {
+            width: 100%;
+        }
+        
+        .mobile-menu {
+            display: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+        nav ul.show {
+            display: flex;
+            flex-direction: column;
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background-color: var(--primary);
+            width: 200px;
+            padding: 1rem;
+            z-index: 999;
+        }
+        .Sign-Up{
+            text-align: center;
+            font-size: 55px;
+            font-weight: 700;
+            text-decoration: none !important;
+            background-color: #1a2a6c;
+            color: white;
+            padding: 7px 13px;
+            border-radius: 13px;
+            margin-top: 30px;
+        }
+        /* Responsive Styles */
+        @media (max-width: 992px) {
+            .hero h2 {
+                font-size: 2.5rem;
+            }
+            
+            .match-container {
+                flex-direction: column;
+                gap: 2rem;
+            }
+            
+            .vs {
+                transform: rotate(90deg);
+            }
+        }
+        
+        @media (max-width: 768px) {
+            nav ul {
+                display: none;
+            }
+            
+            .mobile-menu {
+                display: block;
+            }
+            
+            .hero h2 {
+                font-size: 2rem;
+            }
+            
+            .hero p {
+                font-size: 1rem;
+            }
+            
+            .btn {
+                padding: 0.6rem 1.5rem;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .logo-text h1 {
+                font-size: 1.5rem;
+            }
+            
+            .hero h2 {
+                font-size: 1.8rem;
+            }
+            
+            .section-title h2 {
+                font-size: 2rem;
+            }
+            
+            .news-container, .players-container {
+                grid-template-columns: 1fr;
+            }
+        } 
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-container">
+            <div class="logo">
+                <img src="./multimedia/Alamu-fa-img/olori fridaosi.jpg" alt="Telu FC Logo">
+                <div class="logo-text">
+                    <span>PRINCE DAUDA ABIMBOLA</span>
+                    <h1>FOOTBALL</h1>
+                    <span>COMPETITION</span>
+                </div>
+            </div>
+            <nav>
+                <ul>
+                    <li><a class="active" href="../index.html">Home</a></li>
+                    <li><a href="./pages/under-10-sign-up.html">Under-10</a></li>
+                    <li><a href="./pages/">Under-15</a></li>
+                    <li><a href="./pages/admin-log-in.html">Admin</a></li>
+                    <li><a href="#">Contact</a></li>
+                    <!-- <li ><a style="background-color: white; color: black; padding: 7px 13px; border-radius: 7px;" href="./pages/competition.html">Competition</a></li> -->
+                </ul>
+            </nav>
+            <div class="mobile-menu">
+                <i class="fas fa-bars"></i>
+            </div>
+        </div>
+    </header>
+    <section>
+        <div style="text-align: center; margin-top: 150px; ">
+            <h1 style="margin-bottom: 30px;">Sign-Up</h1>
+            <div style="gap: 20px; display: flex; flex-wrap: wrap; justify-content: center;">
+                <a class="Sign-Up" href="#" onclick="confirmSignUp('Under-10', './pages/under-10-sign-up.html')">Under-10</a>
+                <a class="Sign-Up" href="#" onclick="confirmSignUp('Under-15', './under-15-sign-up.html')">Under-15</a>
+            </div>
+        </div>
+    </section>
+    <script>
+        const menuToggle = document.querySelector('.mobile-menu');
+        const navList = document.querySelector('nav ul');
+
+        menuToggle.addEventListener('click', () => {
+            navList.classList.toggle('show');
+        });
+
+        function confirmSignUp(category, url) {
+            Swal.fire({
+                title: `Proceed to ${category} Sign-Up?`,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, continue',
+                cancelButtonText: 'Cancel',
+                confirmButtonColor: '#1a2a6c',
+                cancelButtonColor: '#b21f1f'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Redirecting...',
+                        toast: true,
+                        position: 'top-end',
+                        showConfirmButton: false,
+                        timer: 1200,
+                        timerProgressBar: true
+                    });
+                    setTimeout(() => {
+                        window.location.href = url;
+                    }, 1300);
+                }
+            });
+        }
+    </script>
+</body>
+</html>
