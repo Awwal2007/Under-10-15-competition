@@ -79,7 +79,7 @@
           throw new Error("Unauthorized user");
         }
         Swal.fire("Success", "Login successful!", "success").then(() => {
-          window.location.href = "admin-dashboard.html";
+          window.location.href = "admin.html";
         });
       } catch (error) {
         Swal.fire("Error", error.message, "error");
