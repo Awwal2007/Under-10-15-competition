@@ -6,6 +6,7 @@
   <title>Admin - Teams Overview</title>
   <link rel="shortcut icon" href="../multimedia/Alamu-fa-img/Telu Fc logo.png" type="png">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <style>
     body {
@@ -19,30 +20,77 @@
       box-shadow: 0 0 8px rgba(0,0,0,0.1);
       margin-bottom: 20px;
       padding: 20px;
+      transition: transform 0.2s;
+      width: 75%;
+      justify-self: center;
+    }
+    .team-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
     }
     .player-item {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 6px 0;
+      padding: 8px 0;
       border-bottom: 1px solid #eee;
     }
-    img{
-        width: 45px;
+    img.team-logo {
+      width: 60px;
+      height: 60px;
+      object-fit: cover;
+      border-radius: 50%;
+    }
+    img.player-avatar {
+      width: 40px;
+      height: 40px;
+      object-fit: cover;
+      border-radius: 50%;
+    }
+    .loading-spinner {
+      display: none;
+      text-align: center;
+      margin: 20px 0;
+    }
+    .status-badge {
+      font-size: 0.8rem;
+      padding: 5px 10px;
+    }
+    .action-buttons {
+      display: flex;
+      gap: 8px;
+    }
+    @media (max-width: 768px) {
+      #email{
+        max-width: 30px;
+        font-size: 0.7rem;
+      }
+      .team-card{
+        /* width: 100%; */
+      }
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <div style="text-align: center; margin-bottom: 10px;">
+    <div style="text-align: center; margin-bottom: 20px;">
       <a href="../index.html">
-        <img src="../multimedia/Alamu-fa-img/olori fridaosi.jpg" width="100" alt="">
+        <img src="../multimedia/Alamu-fa-img/olori fridaosi.jpg" width="120" alt="Logo" class="mb-3">
       </a>
     </div>
-    <h2 class="mb-4 fw-bold">Admin Dashboard - Teams & Players</h2>
+    <h2 class="mb-4 fw-bold text-center">Admin Dashboard - Teams & Players</h2>
+    <div id="loadingSpinner" class="loading-spinner">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+      <p class="mt-2">Loading teams data...</p>
+    </div>
     <div id="teamList"></div>
   </div>
 
+  <!-- EmailJS Script -->
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+  
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
     import {
@@ -56,135 +104,273 @@
     } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
     import {
       getAuth,
-      onAuthStateChanged
+      onAuthStateChanged,
+      signOut
     } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-  
+
+    // Initialize EmailJS
+    emailjs.init({
+      publicKey: "mUDxb9BbnKtsGIjMI",
+      blockHeadless: true,
+      limitRate: {
+        id: 'app',
+        throttle: 10000
+      }
+    });
+
     const firebaseConfig = {
       apiKey: "AIzaSyAkrLza9I264cJmgeeup35Vm3Qqh73cBvk",
       authDomain: "telu-fc-43b17.firebaseapp.com",
       projectId: "telu-fc-43b17",
-      storageBucket: "telu-fc-43b17.firebasestorage.app",
+      storageBucket: "telu-fc-43b17.appspot.com",
       messagingSenderId: "1027059651071",
       appId: "1:1027059651071:web:9c8e503ad879cec53617ca"
     };
-  
+
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
     const auth = getAuth(app);
     const teamList = document.getElementById("teamList");
-  
+    const loadingSpinner = document.getElementById("loadingSpinner");
+    const teluLogo = "../multimedia/Alamu-fa-img/Telu Fc logo.png"
+
+    // Admin verification
     onAuthStateChanged(auth, (user) => {
-      if (!user || user.email !== "admin@example.com") {
-        window.location.href = "./admin-log-in.html";
-      }
-    });
-  
-    // Load Teams and Their Players
+        if (!user || user.email !== "admin@example.com") {
+          window.location.href = "./admin-log-in.html";
+        }else{
+          loadTeams();
+        }
+      });
+    // Load Teams and Players
     async function loadTeams() {
-      teamList.innerHTML = "";
-      const teamsSnapshot = await getDocs(collection(db, "teams"));
-  
-      for (const teamDoc of teamsSnapshot.docs) {
-        const teamId = teamDoc.id;
-        const teamData = teamDoc.data();
-  
-        const playersSnapshot = await getDocs(collection(db, "teams", teamId, "players"));
-        const players = playersSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-  
-        const card = document.createElement("div");
-        card.className = "team-card";
-  
-        const approvedText = teamData.isApproved ? "Approved" : "Pending Approval";
-        const approveButton = !teamData.isApproved
-          ? `<button class="btn btn-sm btn-success me-2" onclick="approveTeam('${teamId}', this)">Approve</button>`
-          : "";
-  
-        card.innerHTML = `
-          <div class="d-flex justify-content-between align-items-center">
-            <div>
-              <img src=${teamData.image || ""} alt="">
-              <h5>${teamData.name || teamData.email || teamId}</h5>
-              <p class="mb-1"><strong>Status:</strong> ${approvedText}</p>
+      try {
+        loadingSpinner.style.display = "block";
+        teamList.innerHTML = "";
+        
+        const teamsSnapshot = await getDocs(collection(db, "teams"));
+        const teamPromises = teamsSnapshot.docs.map(async (teamDoc) => {
+          const teamId = teamDoc.id;
+          const teamData = teamDoc.data();
+          const playersSnapshot = await getDocs(collection(db, "teams", teamId, "players"));
+          const players = playersSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+          return { teamId, teamData, players };
+        });
+        
+        const teams = await Promise.all(teamPromises);
+        renderTeams(teams);
+      } catch (error) {
+        console.error("Error loading teams:", error);
+        Swal.fire("Error", "Failed to load teams. Please try again.", "error");
+      } finally {
+        loadingSpinner.style.display = "none";
+      }
+    }
+    
+    // Render teams to DOM
+    function renderTeams(teams) {
+      if (teams.length === 0) {
+        teamList.innerHTML = `
+          <div class="alert alert-info text-center">
+            <i class="bi bi-info-circle-fill"></i> No teams found.
+          </div>
+        `;
+        return;
+      }
+
+      teamList.innerHTML = teams.map(({ teamId, teamData, players }) => `
+        <div class="team-card" id="team-${teamId}">
+          <div class="d-flex justify-content-between align-items-start">
+            <div class="d-flex align-items-center gap-3">
+              <img src="${teamData.image || 'https://via.placeholder.com/60'}" 
+                   alt="Team logo" 
+                   class="team-logo">
+              <div>
+                <h5 class="mb-1">${teamData.name || teamData.email || teamId}</h5>
+                <span class="status-badge badge ${teamData.isApproved ? 'bg-success' : 'bg-warning text-dark'}">
+                  ${teamData.isApproved ? 'Approved' : 'Pending Approval'}
+                </span>
+                <p id="email" class="small  mb-1">${teamData.email || ''}</p>
+              </div>
             </div>
-            <div>
-              ${approveButton}
-              <button class="btn btn-danger btn-sm" onclick="deleteTeam('${teamId}')">Delete Team</button>
+            <div class="action-buttons">
+              ${!teamData.isApproved ? `
+                <button class="btn btn-sm btn-success" onclick="approveTeam('${teamId}')">
+                  <i class="bi bi-check-circle"></i> Approve
+                </button>
+              ` : ''}
+              <button class="btn btn-sm btn-danger" onclick="deleteTeam('${teamId}')">
+                <i class="bi bi-trash"></i> Del
+              </button>
             </div>
           </div>
           <div class="mt-3">
-            <h6>Players (${players.length})</h6>
-            <div>
-              ${players.map(player => `
+            <h6><i class="bi bi-people-fill"></i> Players (${players.length})</h6>
+            <div class="mt-2">
+              ${players.length > 0 ? players.map(player => `
                 <div class="player-item">
-                  <div>
-                    <img src=${player.imageURL || ""} alt="">
+                  <div class="d-flex align-items-center gap-2">
+                    <img src="${player.imageURL || 'https://via.placeholder.com/40'}" 
+                         alt="Player" 
+                         class="player-avatar">
+                    <div>
+                      <strong>${player.name}</strong>
+                      <div class="small text-muted">
+                        ${player.age} years • ${player.position}
+                      </div>
+                    </div>
                   </div>
-                  <span>Name: ${player.name} - Age: ${player.age}, Position: ${player.position}</span>
-                  <button class="btn btn-sm btn-outline-danger" onclick="deletePlayer('${teamId}', '${player.id}', this)">Delete</button>
+                  <button class="btn btn-sm btn-outline-danger" 
+                          onclick="deletePlayer('${teamId}', '${player.id}')">
+                    <i class="bi bi-trash"></i>
+                  </button>
                 </div>
-              `).join('')}
-              ${players.length === 0 ? '<p class="text-muted">No players.</p>' : ''}
+              `).join('') : `
+                <div class="alert alert-light text-center py-2 small">
+                  <i class="bi bi-info-circle"></i> No players registered yet
+                </div>
+              `}
             </div>
           </div>
-        `;
-        teamList.appendChild(card);
-      }
+        </div>
+      `).join('');
     }
-  
+
     // Delete Player
-    window.deletePlayer = async (teamId, playerId, btn) => {
-      const confirm = await Swal.fire({
-        title: "Delete player?",
-        text: "This action cannot be undone.",
-        icon: "warning",
-        showCancelButton: true,
-        confirmButtonColor: "#dc3545",
-        confirmButtonText: "Yes, delete"
-      });
-  
-      if (confirm.isConfirmed) {
-        await deleteDoc(doc(db, "teams", teamId, "players", playerId));
-        btn.parentElement.remove();
-        Swal.fire("Deleted!", "Player removed.", "success");
+    window.deletePlayer = async (teamId, playerId) => {
+      try {
+        const { isConfirmed } = await Swal.fire({
+          title: "Delete Player?",
+          html: "This will permanently remove the player from the team.",
+          icon: "warning",
+          showCancelButton: true,
+          confirmButtonColor: "#dc3545",
+          confirmButtonText: "Yes, delete",
+          cancelButtonText: "Cancel"
+        });
+    
+        if (isConfirmed) {
+          await deleteDoc(doc(db, "teams", teamId, "players", playerId));
+          const playerElement = document.querySelector(`[onclick="deletePlayer('${teamId}', '${playerId}')"]`);
+          if (playerElement) {
+            playerElement.closest('.player-item').remove();
+            Swal.fire("Deleted!", "Player removed successfully.", "success");
+          }
+        }
+      } catch (error) {
+        console.error("Error deleting player:", error);
+        Swal.fire("Error", "Failed to delete player", "error");
       }
     };
-  
+
     // Delete Team
     window.deleteTeam = async (teamId) => {
-      const confirm = await Swal.fire({
-        title: "Delete entire team?",
-        text: "All players will also be deleted.",
-        icon: "warning",
-        showCancelButton: true,
-        confirmButtonColor: "#dc3545",
-        confirmButtonText: "Yes, delete team"
-      });
-  
-      if (confirm.isConfirmed) {
-        const playerCollection = collection(db, "teams", teamId, "players");
-        const playerDocs = await getDocs(playerCollection);
-        for (const docSnap of playerDocs.docs) {
-          await deleteDoc(doc(docSnap.ref));
-        }
-  
-        await deleteDoc(doc(db, "teams", teamId));
-        Swal.fire("Deleted!", "Team and its players removed.", "success");
-        loadTeams();
-      }
-    };
-  
-    // ✅ Approve Team Function
-    window.approveTeam = async (teamId, btn) => {
       try {
-        await setDoc(doc(db, "teams", teamId), { isApproved: true }, { merge: true });
-        Swal.fire("Approved!", "Team is now approved to add players.", "success");
-        loadTeams();
+        const { isConfirmed } = await Swal.fire({
+          title: "Delete Team?",
+          html: "This will permanently delete the team and all its players.",
+          icon: "warning",
+          showCancelButton: true,
+          confirmButtonColor: "#dc3545",
+          confirmButtonText: "Yes, delete team",
+          cancelButtonText: "Cancel"
+        });
+    
+        if (isConfirmed) {
+          // Delete all players first
+          const playerCollection = collection(db, "teams", teamId, "players");
+          const playerDocs = await getDocs(playerCollection);
+          
+          const deletePromises = playerDocs.docs.map(docSnap => 
+            deleteDoc(doc(db, "teams", teamId, "players", docSnap.id))
+          );
+          
+          await Promise.all(deletePromises);
+          await deleteDoc(doc(db, "teams", teamId));
+          
+          // Remove team from UI
+          const teamElement = document.getElementById(`team-${teamId}`);
+          if (teamElement) {
+            teamElement.remove();
+          }
+          
+          Swal.fire("Deleted!", "Team and all players removed successfully.", "success");
+        }
       } catch (error) {
-        console.error("Approval failed:", error);
-        Swal.fire("Error", "Could not approve the team.", "error");
+        console.error("Error deleting team:", error);
+        Swal.fire("Error", "Failed to delete team", "error");
       }
     };
-    loadTeams();
-  </script>  
+
+    // Approve Team
+    // In your approveTeam function, replace with this:
+
+    window.approveTeam = async (teamId) => {
+      try {
+        const teamRef = doc(db, "teams", teamId);
+        const teamSnap = await getDoc(teamRef);
+        
+        if (!teamSnap.exists()) {
+          throw new Error("Team not found");
+        }
+        
+        const teamData = teamSnap.data();
+        
+        // Validate email before proceeding
+        if (!teamData.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(teamData.email)) {
+          throw new Error("Team has no valid email address");
+        }
+        
+        const { value: accept } = await Swal.fire({
+          title: "Approve Team?",
+          html: `Approve <strong>${teamData.name || teamData.email}</strong>?<br>
+                An approval email will be sent to ${teamData.email}`,
+          icon: "question",
+          showCancelButton: true,
+          confirmButtonText: "Yes, approve",
+          showLoaderOnConfirm: true,
+          preConfirm: async () => {
+            try {
+              // Prepare email parameters
+              const templateParams = {
+                to_name: teamData.coachName || "Team Manager",
+                to_email: teamData.email,
+                team_name: teamData.name || "Your Team",
+                to_logo: teluLogo,
+                from_name: "Telu FC Admin",
+                reply_to: "no-reply@telufc.com",
+                subject: "Team Approval Notification"
+              };
+              
+              // First try to send email
+              await emailjs.send(
+                "service_jfovoso",
+                "template_wcipsts",
+                templateParams
+              );
+              
+              // Only update status if email succeeds
+              await setDoc(teamRef, { isApproved: true }, { merge: true });
+              
+              return true;
+            } catch (error) {
+              console.error("Approval process failed:", error);
+              Swal.showValidationMessage(`Approval failed: ${error.message}`);
+              return false;
+            }
+          }
+        });
+        
+        if (accept) {
+          await loadTeams();
+          Swal.fire("Approved!", "Team is now approved and notified.", "success");
+        }
+      } catch (error) {
+        console.error("Approval error:", error);
+        Swal.fire("Error", error.message || "Approval failed", "error");
+      }
+    };
+      
+  </script>
 </body>
 </html>

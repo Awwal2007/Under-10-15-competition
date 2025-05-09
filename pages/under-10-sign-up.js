@@ -26,6 +26,7 @@ const errorP = document.getElementById('errorP');
 const spinner = document.getElementById('spinner');
 const submitBTN = document.getElementById('submitBTN');
 const signUpForm = document.getElementById('signUpForm');
+// const coachName = document.getElementById('coachName')
 
 // Image Preview
 imageInput.addEventListener('change', function () {
@@ -58,6 +59,8 @@ async function createTeamAccount(e) {
       const teamDetails = {
           name: signUpForm.teamName.value.trim(),
           email: signUpForm.email.value.trim(),
+          coachName: signUpForm.coachName.value.trim(),
+          coachPhone: signUpForm.coachPhone.value.trim(),
           password: signUpForm.password.value.trim(),
           confirmPassword: signUpForm.confirmPassword.value.trim(),
           image: reader.result,
